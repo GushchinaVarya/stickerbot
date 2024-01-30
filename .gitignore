@@ -4,4 +4,4 @@ all_users_ids.csv
 requests.csv
 requests_copy.csv
 users_rating.csv
-log.log
+logfile.log

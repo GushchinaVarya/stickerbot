@@ -16,7 +16,7 @@ async def set_reminder_for_admin(update: Update, context: ContextTypes.DEFAULT_T
     chat_id = update.effective_message.chat_id
     try:
         job_removed = remove_job_if_exists(str(chat_id), context)
-        context.job_queue.run_repeating(reminder_for_admin, 60, chat_id=chat_id, name=str(chat_id), data='some info')
+        context.job_queue.run_repeating(reminder_for_admin, 60*60, chat_id=chat_id, name=str(chat_id), data='some info')
         text = "Timer successfully set!"
         if job_removed:
             text += " Old one was removed."

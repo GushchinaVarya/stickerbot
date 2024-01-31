@@ -20,10 +20,6 @@ MODE, AMOUNT, PHONE, DONE, TO_DO = range(5)
 reply_keyboard_mode = [
     ["Поделиться","Попросить","Узнать о текущей программе"]
 ]
-keyboard_mode = [[InlineKeyboardButton("Поделиться", callback_data="Поделиться"),
-                  InlineKeyboardButton("Попросить", callback_data="Попросить")],
-                  [InlineKeyboardButton("Узнать о текущей программе", callback_data="info")]]
-
 markup_mode = ReplyKeyboardMarkup(reply_keyboard_mode, one_time_keyboard=True)
 
 
@@ -47,12 +43,29 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_id = update.message.chat.id
     add_user_id(user_id, ALL_USERS_IDS_FILE)
     await update.message.reply_text(
-        'Привет! Это бот по обмену стикерами Альфа Меги! Здесь можно попросить у пользователей альфамегастикеры и поделиться ненужными стикерами с другими. Бот помнит своих героев, поэтому тот, кто больше всех делится получает приоритет тогда, когда ему самому не хватает:)',
+        'Привет! Это бот по обмену стикерами Альфа Меги! Здесь можно попросить у пользователей альфамегастикеры и поделиться ненужными стикерами с другими.',
         reply_markup=markup_mode,
     )
-
-
     return MODE
+
+@debug_request
+async def about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Start the conversation and ask user for input."""
+    user_id = update.message.chat.id
+    add_user_id(user_id, ALL_USERS_IDS_FILE)
+    await update.message.reply_text(
+        '''Этот бот создан для обмена стикерами Альфа Меги 
+Если вам не хватает стикеров, вы можете попросить у других пользователей. 
+Если у вас есть лишние стикеры вы можете поделиться ими. 
+Когда вы делитесь, ваш рейтинг увеличивается, и вы будете в приоритете, когда вам будет не хватать стикеров.
+
+Если вы хотите оставить обратную связь или вам нужна помощь напишите нам - @stickerbothelp
+Поблагодарить создателей 
+        ''',
+        reply_markup=ReplyKeyboardMarkup(
+            [["Воспользоваться ботом"]],
+            one_time_keyboard=True)
+    )
 
 
 @debug_request
@@ -119,12 +132,12 @@ async def done(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     user_data = context.user_data
     if user_data["Поделиться или попросить"] == "Попросить":
         await update.message.reply_text(
-            f"Отлично, мы записали ваш запрос. Когда у кого-то из пользователей появятся лишние стикеры, бот отправит их вам.",
+            f"Отлично, мы записали ваш запрос. Когда у кого-то из пользователей появятся лишние стикеры, бот отправит их вам. Когда в следующий раз вы захотите воспользоваться ботом введите команду /start",
             reply_markup=ReplyKeyboardRemove(),
         )
     if user_data["Поделиться или попросить"] == "Поделиться":
         await update.message.reply_text(
-            f"Спасибо что готовы поделиться! Отправьте пожалуйста ваши лишние стикеры на номер {ADMIN_PHONE}",
+            f"Спасибо что готовы поделиться! Отправьте пожалуйста ваши лишние стикеры на номер {ADMIN_PHONE}. Когда в следующий раз вы захотите воспользоваться ботом введите команду /start",
             reply_markup=ReplyKeyboardRemove(),
         )
     add_request(update.message.chat.id, REQUESTS_FILE, user_data)
@@ -143,7 +156,8 @@ async def information(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
         photo=open(INFO_PHOTO_2, 'rb'),
     )
     await update.message.reply_text(
-        'Больше информации о программе https://www.alphamega.com.cy/en/benefits/stick-win',
+        f'''Программа заканчивается {DATE_FINISH_PROGRAMM.strftime("%d %b %Y")} 
+Больше информации - https://www.alphamega.com.cy/en/benefits/stick-win''',
         reply_markup=ReplyKeyboardMarkup(
             [["Воспользоваться ботом"]],
             one_time_keyboard=True)
@@ -159,7 +173,7 @@ def main() -> None:
 
     # Add conversation handler with the states CHOOSING, TYPING_CHOICE and TYPING_REPLY
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler("start", start)],
+        entry_points=[CommandHandler("start", start), MessageHandler(filters.Regex("^Воспользоваться ботом$"), start)],
         states={
             MODE: [
                 MessageHandler(filters.Regex("^(Поделиться|Попросить)$"), amount)
@@ -190,10 +204,11 @@ def main() -> None:
     application.add_handler(CommandHandler('notify', notify_all_users_admin))
     application.add_handler(CallbackQueryHandler(change_requests_admin, pattern="^admin transfered$"))
     application.add_handler(CommandHandler("set_reminder", set_reminder_for_admin))
+    application.add_handler(CommandHandler("set_reminder_pe", set_reminder_for_programm_end))
     application.add_handler(CommandHandler('info', information))
     application.add_handler(MessageHandler(filters.Regex("^Узнать о текущей программе$"), information))
-    application.add_handler(MessageHandler(filters.Regex("^/start$"), start))
     application.add_handler(MessageHandler(filters.Regex("^Воспользоваться ботом$"), start))
+    application.add_handler(CommandHandler('about', about))
 
     # Run the bot until the user presses Ctrl-C
     application.run_polling(allowed_updates=Update.ALL_TYPES)

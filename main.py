@@ -144,6 +144,10 @@ async def information(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     )
     await update.message.reply_text(
         'Больше информации о программе https://www.alphamega.com.cy/en/benefits/stick-win',
+        reply_markup=ReplyKeyboardMarkup(
+            [["Воспользоваться ботом"]],
+            one_time_keyboard=True)
+
     )
     await context.bot.deleteMessage(message_id=must_delete.message_id, chat_id=update.message.chat_id)
 
@@ -176,7 +180,9 @@ def main() -> None:
             ]
         },
         fallbacks=[MessageHandler(filters.Regex("^Верно$"), done),
-                   MessageHandler(filters.Regex("^Ввести данные заново$"), start)],
+                   MessageHandler(filters.Regex("^Ввести данные заново$"), start),
+                   MessageHandler(filters.Regex("^/start"), start),
+                   MessageHandler(filters.Regex("^Воспользоваться ботом$"), start)],
     )
 
     application.add_handler(conv_handler)
@@ -186,6 +192,8 @@ def main() -> None:
     application.add_handler(CommandHandler("set_reminder", set_reminder_for_admin))
     application.add_handler(CommandHandler('info', information))
     application.add_handler(MessageHandler(filters.Regex("^Узнать о текущей программе$"), information))
+    application.add_handler(MessageHandler(filters.Regex("^/start$"), start))
+    application.add_handler(MessageHandler(filters.Regex("^Воспользоваться ботом$"), start))
 
     # Run the bot until the user presses Ctrl-C
     application.run_polling(allowed_updates=Update.ALL_TYPES)

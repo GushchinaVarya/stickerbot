@@ -2,7 +2,7 @@ from config import *
 from validators import *
 from logger_debug import *
 from csv_functions import *
-from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove, Update
+from telegram import ReplyKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardRemove, Update, InlineKeyboardMarkup
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -18,8 +18,11 @@ from timer import *
 MODE, AMOUNT, PHONE, DONE, TO_DO = range(5)
 
 reply_keyboard_mode = [
-    ["Поделиться","Попросить"]
+    ["Поделиться","Попросить","Узнать о текущей программе"]
 ]
+keyboard_mode = [[InlineKeyboardButton("Поделиться", callback_data="Поделиться"),
+                  InlineKeyboardButton("Попросить", callback_data="Попросить")],
+                  [InlineKeyboardButton("Узнать о текущей программе", callback_data="info")]]
 
 markup_mode = ReplyKeyboardMarkup(reply_keyboard_mode, one_time_keyboard=True)
 
@@ -129,6 +132,22 @@ async def done(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     return ConversationHandler.END
 
 
+async def information(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    must_delete = await update.message.reply_text(
+        'Загружаю информацию ...',
+    )
+    await update.message.reply_photo(
+        photo=open(INFO_PHOTO_1, 'rb'),
+    )
+    await update.message.reply_photo(
+        photo=open(INFO_PHOTO_2, 'rb'),
+    )
+    await update.message.reply_text(
+        'Больше информации о программе https://www.alphamega.com.cy/en/benefits/stick-win',
+    )
+    await context.bot.deleteMessage(message_id=must_delete.message_id, chat_id=update.message.chat_id)
+
+
 def main() -> None:
     """Run the bot."""
     # Create the Application and pass it your bot's token.
@@ -165,6 +184,8 @@ def main() -> None:
     application.add_handler(CommandHandler('notify', notify_all_users_admin))
     application.add_handler(CallbackQueryHandler(change_requests_admin, pattern="^admin transfered$"))
     application.add_handler(CommandHandler("set_reminder", set_reminder_for_admin))
+    application.add_handler(CommandHandler('info', information))
+    application.add_handler(MessageHandler(filters.Regex("^Узнать о текущей программе$"), information))
 
     # Run the bot until the user presses Ctrl-C
     application.run_polling(allowed_updates=Update.ALL_TYPES)

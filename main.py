@@ -18,13 +18,13 @@ from timer import *
 MODE, AMOUNT, PHONE, DONE, TO_DO = range(5)
 
 reply_keyboard_mode = [
-    ["Поделиться","Попросить","Узнать о текущей программе"]
+    ["Поделиться"],["Попросить"],["Узнать о текущей программе"]
 ]
 markup_mode = ReplyKeyboardMarkup(reply_keyboard_mode, one_time_keyboard=True)
 
 
 reply_keyboard_confirmation = [
-            ["Верно", "Ввести данные заново"]
+            ["Верно"], ["Ввести данные заново"]
         ]
 markup_confirmation = ReplyKeyboardMarkup(reply_keyboard_confirmation, one_time_keyboard=True)
 
@@ -40,12 +40,24 @@ def facts_to_str(user_data: Dict[str, str]) -> str:
 @debug_request
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Start the conversation and ask user for input."""
-    user_id = update.message.chat.id
+    try:
+        user_id = update.message.chat.id
+        await update.message.reply_text(
+            'Привет! Это бот по обмену стикерами Альфа Меги! Здесь можно попросить у пользователей альфамегастикеры и поделиться ненужными стикерами с другими.',
+            reply_markup=markup_mode,
+        )
+    except:
+        logger.info('no update messase')
+        try:
+            user_id = update.callback_query.from_user.id
+            await context.bot.send_message(
+                chat_id=int(user_id),
+                text='Привет! Это бот по обмену стикерами Альфа Меги! Здесь можно попросить у пользователей альфамегастикеры и поделиться ненужными стикерами с другими.',
+                reply_markup=markup_mode,
+            )
+        except:
+            logger.info('FATAL!!!!!! no userid')
     add_user_id(user_id, ALL_USERS_IDS_FILE)
-    await update.message.reply_text(
-        'Привет! Это бот по обмену стикерами Альфа Меги! Здесь можно попросить у пользователей альфамегастикеры и поделиться ненужными стикерами с другими.',
-        reply_markup=markup_mode,
-    )
     return MODE
 
 @debug_request
@@ -62,9 +74,7 @@ async def about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 Если вы хотите оставить обратную связь или вам нужна помощь напишите нам - @stickerbothelp
 Поблагодарить создателей 
         ''',
-        reply_markup=ReplyKeyboardMarkup(
-            [["Воспользоваться ботом"]],
-            one_time_keyboard=True)
+        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Воспользоваться ботом", callback_data="Воспользоваться ботом")]])
     )
 
 
@@ -158,10 +168,7 @@ async def information(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
     await update.message.reply_text(
         f'''Программа заканчивается {DATE_FINISH_PROGRAMM.strftime("%d %b %Y")} 
 Больше информации - https://www.alphamega.com.cy/en/benefits/stick-win''',
-        reply_markup=ReplyKeyboardMarkup(
-            [["Воспользоваться ботом"]],
-            one_time_keyboard=True)
-
+        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Воспользоваться ботом", callback_data="Воспользоваться ботом")]])
     )
     await context.bot.deleteMessage(message_id=must_delete.message_id, chat_id=update.message.chat_id)
 
@@ -173,7 +180,9 @@ def main() -> None:
 
     # Add conversation handler with the states CHOOSING, TYPING_CHOICE and TYPING_REPLY
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler("start", start), MessageHandler(filters.Regex("^Воспользоваться ботом$"), start)],
+        entry_points=[CommandHandler("start", start),
+                      MessageHandler(filters.Regex("^Воспользоваться ботом$"), start),
+                      CallbackQueryHandler(start, pattern="^Воспользоваться ботом$")],
         states={
             MODE: [
                 MessageHandler(filters.Regex("^(Поделиться|Попросить)$"), amount)
@@ -196,7 +205,8 @@ def main() -> None:
         fallbacks=[MessageHandler(filters.Regex("^Верно$"), done),
                    MessageHandler(filters.Regex("^Ввести данные заново$"), start),
                    MessageHandler(filters.Regex("^/start"), start),
-                   MessageHandler(filters.Regex("^Воспользоваться ботом$"), start)],
+                   MessageHandler(filters.Regex("^Воспользоваться ботом$"), start),
+                   CallbackQueryHandler(start, pattern="^Воспользоваться ботом$")],
     )
 
     application.add_handler(conv_handler)
@@ -209,6 +219,7 @@ def main() -> None:
     application.add_handler(MessageHandler(filters.Regex("^Узнать о текущей программе$"), information))
     application.add_handler(MessageHandler(filters.Regex("^Воспользоваться ботом$"), start))
     application.add_handler(CommandHandler('about', about))
+    application.add_handler(CallbackQueryHandler(start, pattern="^Воспользоваться ботом$"))
 
     # Run the bot until the user presses Ctrl-C
     application.run_polling(allowed_updates=Update.ALL_TYPES)

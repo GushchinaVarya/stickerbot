@@ -35,16 +35,16 @@ async def reminder_for_programm_end(context: ContextTypes.DEFAULT_TYPE) -> None:
     user_id_df = pd.read_csv(ALL_USERS_IDS_FILE, index_col=0)
     for chat_id in np.unique(user_id_df.user_id):
         logger.info('trying to notify chat_id: %s', chat_id)
-        #try:
-        await context.bot.send_message(
-            chat_id=int(chat_id),
-            text=f'Программа заканчивается {DATE_FINISH_PROGRAMM.strftime("%d %b %Y")}. Если у вас есть лишние стикеры или вам не хватает, нажмите "Воспользоваться ботом" ',
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Воспользоваться ботом", callback_data="Воспользоваться ботом")]])
+        try:
+            await context.bot.send_message(
+                chat_id=int(chat_id),
+                text=f'Программа заканчивается {DATE_FINISH_PROGRAMM.strftime("%d %b %Y")}. Если у вас есть лишние стикеры или вам не хватает, нажмите "Воспользоваться ботом" ',
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Воспользоваться ботом", callback_data="Воспользоваться ботом")]])
 
-        )
-        logger.info('notified chat_id: %s', chat_id)
-        #except:
-        #    logger.info('Unknown ERROR chat_id: %s', chat_id)
+            )
+            logger.info('notified chat_id: %s', chat_id)
+        except:
+            logger.info('Unknown ERROR chat_id: %s', chat_id)
 
 
 async def set_reminder_for_programm_end(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

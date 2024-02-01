@@ -52,9 +52,26 @@ async def set_reminder_for_programm_end(update: Update, context: ContextTypes.DE
     """Add a job to the queue."""
     chat_id = update.effective_message.chat_id
     if (chat_id == ADMIN_ID):
-        job_removed = remove_job_if_exists(str(chat_id)+'_program_end', context)
-        context.job_queue.run_once(reminder_for_programm_end, {DATE_FINISH_PROGRAMM - datetime.timedelta(days=7)}, chat_id=chat_id, name=str(chat_id)+'_program_end', data='some info')
-        text = "Timer for programm end reminder successfully set!"
+        job_removed = remove_job_if_exists(str(chat_id)+'_program_end_1', context)
+        context.job_queue.run_once(reminder_for_programm_end, (DATE_FINISH_PROGRAMM - datetime.timedelta(days=14)),
+                                   chat_id=chat_id, name=str(chat_id)+'_program_end_1', data='some info')
+        text = "Timer for programm end reminder 1 successfully set!"
+        if job_removed:
+            text += " Old one was removed."
+        await update.effective_message.reply_text(text)
+
+        job_removed = remove_job_if_exists(str(chat_id) + '_program_end_2', context)
+        context.job_queue.run_once(reminder_for_programm_end, (DATE_FINISH_PROGRAMM - datetime.timedelta(days=7)),
+                                   chat_id=chat_id, name=str(chat_id) + '_program_end_2', data='some info')
+        text = "Timer for programm end reminder 2 successfully set!"
+        if job_removed:
+            text += " Old one was removed."
+        await update.effective_message.reply_text(text)
+
+        job_removed = remove_job_if_exists(str(chat_id) + '_program_end_3', context)
+        context.job_queue.run_once(reminder_for_programm_end, (DATE_FINISH_PROGRAMM - datetime.timedelta(days=3)),
+                                   chat_id=chat_id, name=str(chat_id) + '_program_end_3', data='some info')
+        text = "Timer for programm end reminder 3 successfully set!"
         if job_removed:
             text += " Old one was removed."
         await update.effective_message.reply_text(text)

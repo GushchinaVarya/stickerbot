@@ -18,7 +18,7 @@ from timer import *
 MODE, AMOUNT, PHONE, DONE, TO_DO = range(5)
 
 reply_keyboard_mode = [
-    ["Поделиться"],["Попросить"],["Узнать о текущей программе"]
+    ["Поделиться"],["Попросить"],["Узнать больше о боте"],["Узнать о текущей программе"]
 ]
 markup_mode = ReplyKeyboardMarkup(reply_keyboard_mode, one_time_keyboard=True)
 
@@ -72,9 +72,10 @@ async def about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 Когда вы делитесь, ваш рейтинг увеличивается, и вы будете в приоритете, когда вам будет не хватать стикеров.
 
 Если вы хотите оставить обратную связь или вам нужна помощь напишите нам - @stickerbothelp
-Поблагодарить создателей 
+Поблагодарить создателей https://revolut.me/varvar4sjr
         ''',
-        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Воспользоваться ботом", callback_data="Воспользоваться ботом")]])
+        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Воспользоваться ботом", callback_data="Воспользоваться ботом")]]),
+        disable_web_page_preview=True
     )
 
 
@@ -219,6 +220,7 @@ def main() -> None:
     application.add_handler(MessageHandler(filters.Regex("^Узнать о текущей программе$"), information))
     application.add_handler(MessageHandler(filters.Regex("^Воспользоваться ботом$"), start))
     application.add_handler(CommandHandler('about', about))
+    application.add_handler(MessageHandler(filters.Regex("^Узнать больше о боте$"), about))
     application.add_handler(CallbackQueryHandler(start, pattern="^Воспользоваться ботом$"))
 
     # Run the bot until the user presses Ctrl-C

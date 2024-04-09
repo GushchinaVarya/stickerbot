@@ -72,7 +72,6 @@ async def about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 Когда вы делитесь, ваш рейтинг увеличивается, и вы будете в приоритете, когда вам будет не хватать стикеров.
 
 Если вы хотите оставить обратную связь или вам нужна помощь напишите нам - @stickerbothelp
-Поблагодарить создателей https://revolut.me/varvar4sjr
         ''',
         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Воспользоваться ботом", callback_data="Воспользоваться ботом")]]),
         disable_web_page_preview=True

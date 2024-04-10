@@ -54,13 +54,18 @@ async def notify_all_users_admin(update: Update, context: ContextTypes.DEFAULT_T
         for chat_id in np.unique(user_id_df.user_id):
             logger.info('trying to notify chat_id: %s', chat_id)
             try:
-                #context.bot.sendPhoto(
-                #    chat_id=int(chat_id),
-                #    photo=open(UPDATE_PHOTO, 'rb'),
-                #)
                 await context.bot.send_message(
                     chat_id=int(chat_id),
-                    text=UPDATE_TEXT
+                    text=UPDATE_TEXT_0,
+                    reply_markup=ReplyKeyboardRemove()
+
+                )
+                await context.bot.send_message(
+                    chat_id=int(chat_id),
+                    text=UPDATE_TEXT_1,
+                    reply_markup=InlineKeyboardMarkup(
+                        [[InlineKeyboardButton("Воспользоваться ботом", callback_data="Воспользоваться ботом")]])
+
                 )
                 logger.info('notified chat_id: %s', chat_id)
             except Forbidden:

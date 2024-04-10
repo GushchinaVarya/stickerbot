@@ -57,14 +57,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
             )
         except:
             logger.info('FATAL!!!!!! no userid')
-    add_user_id(user_id, ALL_USERS_IDS_FILE)
+    add_user_id(user_id, ALL_USERS_IDS_FILE, USERS_RATING_FILE)
     return MODE
 
 @debug_request
 async def about(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Start the conversation and ask user for input."""
     user_id = update.message.chat.id
-    add_user_id(user_id, ALL_USERS_IDS_FILE)
+    add_user_id(user_id, ALL_USERS_IDS_FILE, USERS_RATING_FILE)
     await update.message.reply_text(
         '''Этот бот создан для обмена стикерами Альфа Меги 
 Если вам не хватает стикеров, вы можете попросить у других пользователей. 

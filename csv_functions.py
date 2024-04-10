@@ -4,7 +4,7 @@ import numpy as np
 from logger_debug import *
 from typing import Dict
 
-def add_user_id(user_id:int, file:str):
+def add_user_id(user_id:int, file:str, rating:str):
     all_users_ids_df = pd.read_csv(file, index_col=0)
     if user_id not in all_users_ids_df.user_id.values:
         users_ids_df = pd.concat([all_users_ids_df, pd.DataFrame([{'user_id': user_id}])], ignore_index=True)
@@ -12,6 +12,14 @@ def add_user_id(user_id:int, file:str):
         logger.info(f'chat_id {user_id} is new and added to file of unique users')
     else:
         logger.info(f'chat_id {user_id} is in file of unique users ')
+
+    rating_df = pd.read_csv(rating, index_col=0)
+    if user_id not in rating_df.user_id.values:
+        rating_df = pd.concat([rating_df, pd.DataFrame([{'user_id': user_id, 'last_phone_number': 0, 'total_requested': 0, 'total_shared': 0}])], ignore_index=True)
+        rating_df.to_csv(rating)
+        logger.info(f'chat_id {user_id} is new and added to rating file')
+    else:
+        logger.info(f'chat_id {user_id} is in rating file')
 
 
 def add_request(user_id:int, file:str, user_data:Dict[str, str]):
